@@ -1,4 +1,5 @@
 ```agda
+{-# OPTIONS --allow-unsolved-metas #-}
 module plfa.part1.Relations where
 ```
 ## Imports
