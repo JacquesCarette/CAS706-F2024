@@ -4,7 +4,7 @@ permalink : /Lists/
 ---
 
 ```agda
-module plfa.part1.Lists where
+module CAS706.part1.Lists where
 ```
 
 This chapter discusses the list data type.  It gives further examples
@@ -26,7 +26,7 @@ open import Data.Product.Base using (_×_; ∃; ∃-syntax) renaming (_,_ to ⟨
 open import Function.Base using (_∘_)
 open import Function.Bundles using (_⇔_)
 open import Level using (Level)
-open import plfa.part1.Isomorphism using (_≃_)
+open import CAS706.part1.Isomorphism using (_≃_)
 ```
 
 ## Lists

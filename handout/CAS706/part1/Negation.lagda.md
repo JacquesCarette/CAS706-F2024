@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Negation where
+module CAS706.part1.Negation where
 ```
 
 ## Imports
@@ -11,7 +11,7 @@ open import Data.Empty using (⊥)
 open import Data.Sum.Base using (_⊎_; inj₁; inj₂)
 open import Data.Product.Base using (_×_)
 open import Relation.Nullary.Negation using (contradiction)
-open import plfa.part1.Isomorphism using (_≃_; extensionality)
+open import CAS706.part1.Isomorphism using (_≃_; extensionality)
 ```
 
 ## Negation

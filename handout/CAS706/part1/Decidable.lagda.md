@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Decidable where
+module CAS706.part1.Decidable where
 ```
 
 We have a choice as to how to represent relations:
@@ -25,7 +25,7 @@ open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥)
 open import Data.Bool.Base using (Bool; true; false)
 
-open import plfa.part1.Relations using (_<_; z<s; s<s)
+open import CAS706.part1.Relations using (_<_; z<s; s<s)
 ```
 
 ## Evidence vs Computation

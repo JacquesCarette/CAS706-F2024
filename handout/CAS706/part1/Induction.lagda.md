@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Induction where
+module CAS706.part1.Induction where
 ```
 
 ## Imports

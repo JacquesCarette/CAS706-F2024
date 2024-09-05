@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Connectives where
+module CAS706.part1.Connectives where
 ```
 
 _Propositions as Types_:
@@ -20,8 +20,8 @@ open Eq.≡-Reasoning
 open import Data.Nat.Base using (ℕ)
 open import Function.Base using (_∘_)
 
-open import plfa.part1.Isomorphism using (_≃_; _≲_; extensionality)
-open plfa.part1.Isomorphism.≃-Reasoning
+open import CAS706.part1.Isomorphism using (_≃_; _≲_; extensionality)
+open CAS706.part1.Isomorphism.≃-Reasoning
 ```
 
 ## Conjunction is product

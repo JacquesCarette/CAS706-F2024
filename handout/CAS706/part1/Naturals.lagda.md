@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Naturals where
+module CAS706.part1.Naturals where
 ```
 
 ## The naturals are an inductive datatype

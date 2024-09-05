@@ -1,6 +1,6 @@
 ```agda
 {-# OPTIONS --allow-unsolved-metas #-}
-module plfa.part1.Isomorphism where
+module CAS706.part1.Isomorphism where
 ```
 
 ## Imports

@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Equality where
+module CAS706.part1.Equality where
 ```
 
 ## Imports -- none!

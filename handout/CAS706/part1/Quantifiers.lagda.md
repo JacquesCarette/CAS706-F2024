@@ -1,5 +1,5 @@
 ```agda
-module plfa.part1.Quantifiers where
+module CAS706.part1.Quantifiers where
 ```
 
 ## Imports
@@ -11,7 +11,7 @@ open import Data.Nat.Base using (ℕ; zero; suc; _+_; _*_)
 open import Relation.Nullary.Negation using (¬_)
 open import Data.Product.Base using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
 open import Data.Sum.Base using (_⊎_; inj₁; inj₂)
-open import plfa.part1.Isomorphism using (_≃_; extensionality; ∀-extensionality)
+open import CAS706.part1.Isomorphism using (_≃_; extensionality; ∀-extensionality)
 open import Function.Base using (_∘_)
 ```
 
@@ -56,7 +56,7 @@ syntax ∃-syntax (λ x → B) = ∃[ x ] B
 Recall the definitions of `even` and `odd` from
 Chapter [Relations](/Relations/):
 ```agda
-open import plfa.part1.Relations using (even; odd; zero; suc)
+open import CAS706.part1.Relations using (even; odd; zero; suc)
 ```
 
 Equvalence of two obvious ways of defining even/odd:
