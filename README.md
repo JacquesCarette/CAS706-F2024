@@ -11,7 +11,7 @@ a version that does, instead use [my fork](https://github.com/JacquesCarette/plf
 You will find
 - in `handout`, the files used for CAS 706
 - in `filled`, what we ended up doing during lectures
-- in `CAS706/Exercises`, the assignments.
+- in `Exercises`, the assignments.
 
 More material will get posted here as it arises. Such as what was covered in
 the lectures, the extra material used, the assignments, etc.
@@ -29,3 +29,12 @@ the normal method for [installing stdlib](https://github.com/agda/agda-stdlib/bl
 Please help each other with the Agda installation. It's pure technology,
 there is little to be learned by wasting a lot of your time on figuring out
 these arcane details!
+
+## Agda setup
+
+Note that my `$HOME/.agda/libraries` file says:
+```
+/Users/carette/agda-stdlib-2.1/standard-library.agda-lib
+/Users/carette/course/CAS706-F2024/CAS706.agda-lib
+/Users/carette/course/CAS706-F2024/Exercises.agda-lib
+```
