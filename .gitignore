@@ -1,2 +1,5 @@
 *.agdai
 MAlonzo/**
+.DS_Store
+747*.agda
+*.swp
