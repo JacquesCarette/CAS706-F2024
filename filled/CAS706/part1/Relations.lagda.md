@@ -161,39 +161,47 @@ data Total′ : ℕ → ℕ → Set where
 ... | flipped x = flipped (s≤s x)
 ```
 
-
-
-
-
-
-
-
-
+With a helper function instead:
 ```agda
 ≤-total′ : ∀ (m n : ℕ) → Total m n
 ≤-total′ zero    n        =  forward z≤n
 ≤-total′ (suc m) zero     =  flipped z≤n
-≤-total′ (suc m) (suc n)  =  helper (≤-total′ m n)
+≤-total′ (suc m) (suc n)  = helper′ (≤-total′ m n)
   where
-  helper : Total m n → Total (suc m) (suc n)
-  helper (forward m≤n)  =  forward (s≤s m≤n)
-  helper (flipped n≤m)  =  flipped (s≤s n≤m)
+    -- dead code...
+    helper : Total m n → Total (suc m) (suc n)
+    helper (forward x) = forward (s≤s x)
+    helper (flipped x) = flipped (s≤s x)
+
+    helper′ : {x y : ℕ} → Total x y → Total (suc x) (suc y)
+    helper′ (forward x≤y) = forward (s≤s x≤y)
+    helper′ (flipped y≤x) = flipped (s≤s y≤x)
 ```
 
 ## Monotonicity
 
 ```agda
 +-monoʳ-≤ : ∀ (n p q : ℕ) → p ≤ q → n + p ≤ n + q
-+-monoʳ-≤ n p q p≤q  = {!!}
++-monoʳ-≤ zero p q p≤q = p≤q
++-monoʳ-≤ (suc n) p q p≤q = s≤s (+-monoʳ-≤ n p q p≤q)
 
 -- can do directly, or via above
 +-monoˡ-≤ : ∀ (m n p : ℕ) → m ≤ n → m + p ≤ n + p
-+-monoˡ-≤ m n p m≤n = {!!}
++-monoˡ-≤ m n p m≤n rewrite +-comm m p | +-comm n p = +-monoʳ-≤ p m n m≤n
 ```
 
 ```agda
+-- we're splitting on m ≤ n AND THEN rewriting m and/or n to
+-- incorporate that knowledge explicitly
 +-mono-≤ : ∀ (m n p q : ℕ) → m ≤ n → p ≤ q → m + p ≤ n + q
-+-mono-≤ m n p q m≤n p≤q = {!!}
+-- choice of attack: want to use the lemmas above, so force in to the
+-- right shape -- here for monoˡ
++-mono-≤ .zero n p q z≤n p≤q = ≤-trans
+  (+-monoˡ-≤ 0 n p z≤n)
+  (+-monoʳ-≤ n p q p≤q)
+-- and here we don't need anything fancy, the induction of m≤n gave
+-- use all the information we need to induct.
++-mono-≤ (suc m) (suc n) p q (s≤s m≤n) p≤q = s≤s (+-mono-≤ m n p q m≤n p≤q)
 ```
 
 #### Exercise `*-mono-≤` (stretch)
@@ -250,13 +258,16 @@ data odd where
 ```
 Note the overloading of `suc` !
 
+Below: very helpful to write out the implicits to make the goals
+read 'nicely'.
 ```agda
 e+e≡e : ∀ {m n : ℕ} → even m → even n → even (m + n)
 o+e≡o : ∀ {m n : ℕ} → odd m → even n → odd (m + n)
 
-e+e≡e em en = {!!}
+e+e≡e {zero} zero en = en
+e+e≡e {suc m} (suc om) en = suc (o+e≡o om en)
 
-o+e≡o om en = {!!}
+o+e≡o {suc m} {n} (suc em) en = suc (e+e≡e em en)
 ```
 
 #### Exercise `o+o≡e` (stretch) {#odd-plus-odd}
