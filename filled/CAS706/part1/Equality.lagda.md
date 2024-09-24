@@ -17,35 +17,35 @@ infix 4 _≡_
 
 ```agda
 sym : ∀ {A : Set} {x y : A} → x ≡ y → y ≡ x
-sym x≡y = {!!}
+sym refl = refl
 
 trans : ∀ {A : Set} {x y z : A} → x ≡ y → y ≡ z → x ≡ z
-trans x≡y y≡x = {!!}
+trans refl refl = refl
 ```
 
 ## Congruence and substitution {#cong}
 
 ```agda
 cong : ∀ {A B : Set} (f : A → B) {x y : A} → x ≡ y → f x ≡ f y
-cong f x≡y = {!!}
+cong f refl = refl
 
 cong₂ : ∀ {A B C : Set} (f : A → B → C) {u x : A} {v y : B}
   → u ≡ x → v ≡ y → f u v ≡ f x y
-cong₂ f u≡x v≡y = {!!}
+cong₂ f refl refl = refl
 
 cong-app : ∀ {A B : Set} {f g : A → B} → f ≡ g
   → ∀ (x : A) → f x ≡ g x
-cong-app f≡g x = {!!}
+cong-app refl x = refl
 
 cong-app′ : ∀ {A B : Set} {f g : A → B} → f ≡ g
   → ∀ {x : A} → f x ≡ g x
-cong-app′ f≡g = {!!}
+cong-app′ refl = refl
 ```
 
 ```agda
 subst : ∀ {A : Set} {x y : A} (P : A → Set)
   → x ≡ y → P x → P y
-subst P x≡y px = {!!}
+subst P refl px = px
 ```
 
 ## Chains of equations (simplified)
@@ -158,7 +158,7 @@ data odd where
 {-# BUILTIN EQUALITY _≡_ #-}
 
 even-comm : ∀ (m n : ℕ) → even (m + n) → even (n + m)
-even-comm m n ev rewrite +-comm n m = {!!}
+even-comm m n ev rewrite +-comm n m = ev
 ```
 
 ## Multiple rewrites
@@ -190,7 +190,7 @@ even-comm″ : ∀ (m n : ℕ)
   → even (m + n)
     ------------
   → even (n + m)
-even-comm″ m n  =  subst even (+-comm m n)
+even-comm″ m n ev =  subst even (+-comm m n) ev
 ```
 
 ## Leibniz equality
@@ -209,21 +209,27 @@ _≐_ {A} x y = ∀ (P : A → Set) → P x → P y
 
 ```agda
 refl-≐ : ∀ {A : Set} {x : A} → x ≐ x
-refl-≐ P Px  =  {!!}
+refl-≐ P Px  =  Px
 
 trans-≐ : ∀ {A : Set} {x y z : A} → x ≐ y → y ≐ z → x ≐ z
-trans-≐ x≐y y≐z P Px  = {!!}
+trans-≐ x≐y y≐z P Px  = y≐z P (x≐y P Px) -- (x≐y P Px)
 
 -- This one is quite tricky!
 sym-≐ : ∀ {A : Set} {x y : A} → x ≐ y → y ≐ x
-sym-≐ {A} {x} {y} x≐y P  = {!!}
+sym-≐ {A} {x} {y} x≐y P = x≐y Q (λ t → t)
+  where
+    Q : A → Set
+    Q = λ z → P z → P x
 
 ≡-implies-≐ : ∀ {A : Set} {x y : A} → x ≡ y → x ≐ y
-≡-implies-≐ x≡y P  =  {!!}
+≡-implies-≐ refl P = λ t → t
 
 -- need to invent a property again
 ≐-implies-≡ : ∀ {A : Set} {x y : A} → x ≐ y → x ≡ y
-≐-implies-≡ {A} {x} {y} x≐y  = {!!}
+≐-implies-≡ {A} {x} {y} x≐y  = x≐y Q refl
+  where
+    Q : A → Set
+    Q z = x ≡ z
 ```
 
 JC: if this interests you, I can give you more to read.
