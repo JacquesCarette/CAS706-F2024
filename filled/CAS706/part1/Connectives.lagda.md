@@ -21,6 +21,7 @@ open import Data.Nat.Base using (ℕ)
 open import Function.Base using (_∘_)
 
 open import CAS706.part1.Isomorphism using (_≃_; mk-≃; _≲_; extensionality)
+open _≃_
 open CAS706.part1.Isomorphism.≃-Reasoning
 ```
 
@@ -171,12 +172,18 @@ truth′ = _
 
 ```agda
 ⊤-identityˡ : ∀ {A : Set} → ⊤ × A ≃ A
-⊤-identityˡ = {!!}
+⊤-identityˡ .to     ⟨ _ , a ⟩ = a
+⊤-identityˡ .from   a        = ⟨ tt , a ⟩
+⊤-identityˡ .from∘to ⟨ tt , a ⟩  = refl
+⊤-identityˡ .to∘from a          = refl
 ```
 
 ```agda
 ⊤-identityʳ : ∀ {A : Set} → (A × ⊤) ≃ A
-⊤-identityʳ {A} = {!!} -- can do it equationally!
+⊤-identityʳ {A} = ≃-begin
+  (A × ⊤) ≃⟨ ×-comm ⟩
+  (⊤ × A) ≃⟨ ⊤-identityˡ ⟩
+  A ≃-∎ -- can do it equationally!
 ```
 
 ## Disjunction is sum
@@ -192,18 +199,21 @@ evidence
 Eliminator
 ```agda
 case-⊎ : ∀ {A B C : Set} → (A → C) → (B → C) → A ⊎ B → C
-case-⊎ f g x = {!!}
+case-⊎ f g (inj₁ x) = f x
+case-⊎ f g (inj₂ x) = g x
 ```
 
 ```agda
 η-⊎ : ∀ {A B : Set} (w : A ⊎ B) → case-⊎ inj₁ inj₂ w ≡ w
-η-⊎ x = {!!}
+η-⊎ (inj₁ x) = refl
+η-⊎ (inj₂ x) = refl
 ```
 More generally, we can also throw in an arbitrary function from a disjunction:
 ```agda
 uniq-⊎ : ∀ {A B C : Set} (h : A ⊎ B → C) (w : A ⊎ B) →
   case-⊎ (h ∘ inj₁) (h ∘ inj₂) w ≡ h w
-uniq-⊎ h x = {!!}
+uniq-⊎ h (inj₁ x) = refl
+uniq-⊎ h (inj₂ x) = refl
 
 infixr 1 _⊎_
 ```
@@ -230,21 +240,21 @@ There is no possible evidence that `⊥` holds.
 Dual to `⊤`, for `⊥` there is no introduction rule but an elimination rule.
 ```agda
 ⊥-elim : ∀ {A : Set} → ⊥ → A
-⊥-elim x = {!!}
+⊥-elim ()
 
 uniq-⊥ : ∀ {C : Set} (h : ⊥ → C) (w : ⊥) → ⊥-elim w ≡ h w
-uniq-⊥ h w = {!!}
+uniq-⊥ h ()
 ```
 
 ```agda
 ⊥-count : ⊥ → ℕ
-⊥-count w = {!!}
+⊥-count ()
 ```
 ## Implication is function {#implication}
 
 ```agda
 →-elim : ∀ {A B : Set} → (A → B) → A → B
-→-elim L M = {!!}
+→-elim L M = L M
 ```
 Used to be known as _modus ponens_.
 
@@ -253,7 +263,7 @@ Used to be known as _modus ponens_.
 Elimination followed by introduction is the identity:
 ```agda
 η-→ : ∀ {A B : Set} (f : A → B) → (λ (x : A) → f x) ≡ f
-η-→ f = {!!}
+η-→ f = refl
 ```
 
 ```agda
@@ -280,7 +290,10 @@ we have the isomorphism
 
 ```agda
 currying : ∀ {A B C : Set} → (A → B → C) ≃ (A × B → C)
-currying = {!!}
+currying .to        f ⟨ a , b ⟩ = f a b
+currying .from      g   a   b  = g ⟨ a , b ⟩
+currying .from∘to   f = η-→ f
+currying .to∘from   g = extensionality λ { ⟨ a , b ⟩ → refl}
 ```
 
 Corresponding to the law
@@ -293,7 +306,10 @@ we have the isomorphism:
 
 ```agda
 →-distrib-⊎ : ∀ {A B C : Set} → (A ⊎ B → C) ≃ ((A → C) × (B → C))
-→-distrib-⊎ = {!!}
+→-distrib-⊎ .to h = ⟨ h ∘ inj₁ , h ∘ inj₂ ⟩
+→-distrib-⊎ .from ⟨ f , g ⟩ = case-⊎ f g
+→-distrib-⊎ .from∘to h = extensionality (uniq-⊎ h)
+→-distrib-⊎ .to∘from ⟨ f , g ⟩ = refl
 ```
 
 Corresponding to the law
@@ -319,7 +335,13 @@ we have the isomorphism:
 Sums do not distribute over products up to isomorphism, but it is an embedding:
 ```agda
 ⊎-distrib-× : ∀ {A B C : Set} → (A × B) ⊎ C ≲ (A ⊎ C) × (B ⊎ C)
-⊎-distrib-× = {!!}
+⊎-distrib-× ._≲_.to (inj₁ ⟨ a , b ⟩ ) = ⟨ inj₁ a , inj₁ b ⟩
+⊎-distrib-× ._≲_.to (inj₂ x) = ⟨ inj₂ x , inj₂ x ⟩
+⊎-distrib-× ._≲_.from ⟨ inj₁ x , inj₁ y ⟩ = inj₁ ⟨ x , y ⟩
+⊎-distrib-× ._≲_.from ⟨ inj₁ x , inj₂ y ⟩ = inj₂ y
+⊎-distrib-× ._≲_.from ⟨ inj₂ x , x₁ ⟩ = inj₂ x
+⊎-distrib-× ._≲_.from∘to (inj₁ ⟨ x , x₁ ⟩) = refl
+⊎-distrib-× ._≲_.from∘to (inj₂ x) = refl
 ```
 
 ## Standard library
