@@ -21,9 +21,9 @@ open import Data.Bool.Base using (Bool; true; false; T; _∧_; _∨_; not)
 open import Data.Nat.Base using (ℕ; zero; suc; _+_; _*_; _∸_; _≤_; s≤s; z≤n)
 open import Data.Nat.Properties using
   (+-assoc; +-identityˡ; +-identityʳ; *-assoc; *-identityˡ; *-identityʳ; *-distribʳ-+)
-open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Nullary using (¬_; Dec; yes; no; contradiction)
 open import Data.Product.Base using (_×_; ∃; ∃-syntax) renaming (_,_ to ⟨_,_⟩)
-open import Function.Base using (_∘_)
+open import Function.Base using (_∘_; _$_)
 open import Function.Bundles using (_⇔_; mk⇔)
 open import Level using (Level)
 open import CAS706.part1.Isomorphism using (_≃_)
@@ -436,18 +436,29 @@ All-++-⇔ xs ys = mk⇔ (to xs ys) (from xs ys)
   where
   to : ∀ {A : Set} {P : A → Set} (xs ys : List A) →
     All P (xs ++ ys) → (All P xs × All P ys)
-  to xs ys all = {!!}
+    -- no choice here, need to split on `xs` because
+    -- we have no idea what "proof" of `xs ++ ys` exist
+  to [] ys all = ⟨ [] , all ⟩
+  to (x ∷ xs) ys (px ∷ all) with ⟨ pxs , pys ⟩ ← to xs ys all
+    = ⟨ px ∷ pxs , pys ⟩
 
   from : ∀ { A : Set} {P : A → Set} (xs ys : List A) →
     All P xs × All P ys → All P (xs ++ ys)
-  from xs ys pall = {!!}
+  from [] ys ⟨ pxs , pys ⟩ = pys
+  from (x ∷ xs) ys ⟨ px ∷ pxs , pys ⟩ = px ∷ from xs ys ⟨ pxs , pys ⟩
 ```
 
 ## Decidability of All
 
 ```agda
 all : ∀ {A : Set} → (A → Bool) → List A → Bool
-all p  = {!!}
+{- this is the "by hand" version:
+all p [] = true
+all p (x ∷ xs) = p x ∧ all p xs
+-}
+-- all p = foldr (λ x ans → p x ∧ ans) true
+-- yet another way
+all p = foldr _∧_ true ∘ map p
 ```
 The function can be written in a particularly compact style by
 using the higher-order functions `map` and `foldr`.
@@ -460,7 +471,12 @@ Then if predicate `P` is decidable, it is also decidable whether every
 element of a list satisfies the predicate:
 ```agda
 All? : ∀ {A : Set} {P : A → Set} → Decidable P → Decidable (All P)
-All? P? dP = {!!}
+All? {A} {P} P? [] = yes []
+All? {A} {P} P? (x ∷ xs) with P? x | All? P? xs
+... | yes px | yes apxs = yes (px ∷ apxs)
+... | yes px | no ¬apxs = no λ { (px ∷ apxs) → contradiction apxs ¬apxs}
+... | no ¬px | apxs     = no λ { (px ∷ _)    → contradiction px ¬px}
+
 ```
 
 
