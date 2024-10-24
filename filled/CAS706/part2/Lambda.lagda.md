@@ -369,9 +369,13 @@ deterministic implies diamond and confluence.
 
 ```agda
 _ : twoᶜ · sucᶜ · `zero —↠ `suc `suc `zero
-_ =
+_ = 
   begin
-    twoᶜ · sucᶜ · `zero  —→⟨ {!!} ⟩
+    (twoᶜ · sucᶜ) · `zero                    —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+--    (ƛ "z" ⇒ ` "s" · (` "s" · ` "z")) [ "s" := sucᶜ ] · `zero  —→⟨ {!!} ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · `zero  —→⟨ β-ƛ V-zero ⟩
+    sucᶜ · (sucᶜ · `zero)                    —→⟨ ξ-·₂ V-ƛ (β-ƛ V-zero) ⟩
+    sucᶜ · (`suc `zero)                      —→⟨ β-ƛ (V-suc V-zero) ⟩
     `suc (`suc `zero)
   ∎
 ```
@@ -509,6 +513,11 @@ S′ : ∀ {Γ x y A B}
    → Γ , y ⦂ B ∋ x ⦂ A
 
 S′ {x≢y = x≢y} x = S (toWitnessFalse x≢y) x
+
+-- and now the same example:
+_ : ∅ , "x" ⦂ `ℕ ⇒ `ℕ , "y" ⦂ `ℕ , "z" ⦂ `ℕ ∋ "x" ⦂ `ℕ ⇒ `ℕ
+_ = S′ (S′ Z)
+
 ```
 
 ### Typing judgment
@@ -600,7 +609,7 @@ Ch : Type → Type
 Ch A = (A ⇒ A) ⇒ A ⇒ A
 
 ⊢twoᶜ : ∀ {Γ A} → Γ ⊢ twoᶜ ⦂ Ch A
-⊢twoᶜ = {!!}
+⊢twoᶜ = ⊢ƛ (⊢ƛ ((⊢` ∋s) · ((⊢` ∋s) · (⊢` ∋z))))
   where
   ∋s = S′ Z
   ∋z = Z
