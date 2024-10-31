@@ -381,7 +381,8 @@ _ =
 ```
 
 Here is a sample reduction demonstrating that two plus two is four:
-```agda
+(commented out because it's huge)
+
 _ : plus · two · two —↠ `suc `suc `suc `suc `zero
 _ =
   begin
@@ -389,7 +390,6 @@ _ =
   —→⟨ {!!} ⟩
     `suc (`suc (`suc (`suc `zero)))
   ∎
-```
 
 And here is a similar sample reduction for Church numerals:
 ```agda
@@ -618,10 +618,13 @@ Ch A = (A ⇒ A) ⇒ A ⇒ A
 Here are the typings corresponding to computing two plus two:
 ```agda
 ⊢two : ∀ {Γ} → Γ ⊢ two ⦂ `ℕ
-⊢two = {!!}
+⊢two = ⊢suc (⊢suc ⊢zero)
 
 ⊢plus : ∀ {Γ} → Γ ⊢ plus ⦂ `ℕ ⇒ `ℕ ⇒ `ℕ
-⊢plus = {!!}
+⊢plus = ⊢μ (⊢ƛ (⊢ƛ
+    (⊢case (⊢` ∋m)
+       (⊢` ∋n)
+       (⊢suc (((⊢` ∋+) · (⊢`  ∋m′)) · (⊢` ∋n′))))))
   where
   ∋+  = S′ (S′ (S′ Z))
   ∋m  = S′ Z
@@ -630,12 +633,14 @@ Here are the typings corresponding to computing two plus two:
   ∋n′ = S′ Z
 
 ⊢2+2 : ∅ ⊢ plus · two · two ⦂ `ℕ
-⊢2+2 = {!!}
+⊢2+2 = (⊢plus · ⊢two) · ⊢two
 ```
 
 ```agda
 ⊢plusᶜ : ∀ {Γ A} → Γ  ⊢ plusᶜ ⦂ Ch A ⇒ Ch A ⇒ Ch A
-⊢plusᶜ = {!!}
+⊢plusᶜ = ⊢ƛ (⊢ƛ (⊢ƛ (⊢ƛ
+  (((⊢` ∋m) · (⊢` ∋s)) ·
+  (((⊢` ∋n) · (⊢` ∋s)) · (⊢` ∋z))))))
   where
   ∋m = S′ (S′ (S′ Z))
   ∋n = S′ (S′ Z)
@@ -643,12 +648,12 @@ Here are the typings corresponding to computing two plus two:
   ∋z = Z
 
 ⊢sucᶜ : ∀ {Γ} → Γ ⊢ sucᶜ ⦂ `ℕ ⇒ `ℕ
-⊢sucᶜ = {!!}
+⊢sucᶜ = ⊢ƛ (⊢suc (⊢` ∋n))
   where
   ∋n = Z
 
 ⊢2+2ᶜ : ∅ ⊢ plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero ⦂ `ℕ
-⊢2+2ᶜ = {!!}
+⊢2+2ᶜ = (⊢plusᶜ · ⊢twoᶜ) · ⊢twoᶜ · ⊢sucᶜ · ⊢zero
 ```
 
 ### Lookup is functional
@@ -657,7 +662,10 @@ The lookup relation `Γ ∋ x ⦂ A` is functional, in that for each `Γ` and `x
 there is at most one `A` such that the judgment holds:
 ```agda
 ∋-functional : ∀ {Γ x A B} → Γ ∋ x ⦂ A → Γ ∋ x ⦂ B → A ≡ B
-∋-functional xloc₁ xloc₂ = {!!}
+∋-functional Z Z = refl
+∋-functional Z (S x xloc₂) = contradiction refl x
+∋-functional (S x xloc₁) Z = contradiction refl x
+∋-functional (S x xloc₁) (S x₁ xloc₂) = ∋-functional xloc₁ xloc₂
 ```
 
 The typing relation `Γ ⊢ M ⦂ A` is not functional. For example, in any `Γ`
@@ -667,12 +675,12 @@ the term `` ƛ "x" ⇒ ` "x" `` has type `A ⇒ A` for any type `A`.
 
 ```agda
 nope₁ : ∀ {A} → ¬ (∅ ⊢ `zero · `suc `zero ⦂ A)
-nope₁ t = {!!}
+nope₁ (() · s)
 ```
 
 ```agda
-nope₂ : ∀ {A} → ¬ (∅ ⊢ ƛ "x" ⇒ ` "x" · ` "x" ⦂ A)
-nope₂ t  = {!!}
+nope₂ : ∀ {C} → ¬ (∅ ⊢ ƛ "x" ⇒ ` "x" · ` "x" ⦂ C)
+nope₂ (⊢ƛ (⊢` x · ⊢` x₁)) = impossible (∋-functional x x₁)
   where
   impossible : ∀ {A B} → ¬ (A ⇒ B ≡ A)
   impossible ()
