@@ -114,7 +114,8 @@ lookup {(Γ , _)} {(suc n)} (s≤s p)    =  lookup p
 Can go in the opposite direction:
 ```agda
 count : ∀ {Γ} → {n : ℕ} → (p : n < length Γ) → Γ ∋ lookup p
-count {Γ} {n} p = {!!}
+count {Γ , x} {zero} (s≤s z≤n) = Z
+count {Γ , x} {suc n} (s≤s p) = S (count p)
 ```
 
 JC: I think using `Fin` would make things even nicer.
