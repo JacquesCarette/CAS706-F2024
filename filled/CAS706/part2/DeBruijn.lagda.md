@@ -130,7 +130,7 @@ Convenient abbreviation for variables:
 With this abbreviation, we can rewrite the Church numeral two more compactly:
 ```agda
 _ : ∅ ⊢ (`ℕ ⇒ `ℕ) ⇒ `ℕ ⇒ `ℕ
-_ = {!!} -- this is for the Borg... but we'll do this one
+_ = ƛ ƛ (# 1 · (# 1 · # 0)) -- this is for the Borg... but we'll do this one
 ```
 
 ### Test examples
@@ -172,7 +172,8 @@ ext : ∀ {Γ Δ}
   → (∀ {A} →       Γ ∋ A →     Δ ∋ A)
     ---------------------------------
   → (∀ {A B} → Γ , B ∋ A → Δ , B ∋ A)
-ext ρ i = {!!}
+ext ρ Z = Z
+ext ρ (S i) = S ρ i
 ```
 Now we can remame (as a function, instead of a theorem), using
 ext when we encounter binders:
@@ -181,7 +182,14 @@ rename : ∀ {Γ Δ}
   → (∀ {A} → Γ ∋ A → Δ ∋ A)
     -----------------------
   → (∀ {A} → Γ ⊢ A → Δ ⊢ A)
-rename ρ trm = {!!}
+rename ρ (` x) = ` ρ x
+rename ρ (ƛ trm) = ƛ rename (ext ρ) trm
+rename ρ (trm · trm₁) = rename ρ trm · rename ρ trm₁
+rename ρ `zero = `zero
+rename ρ (`suc trm) = `suc rename ρ trm
+rename ρ (case trm trm₁ trm₂) =
+  case (rename ρ trm) (rename ρ trm₁) (rename (ext ρ) trm₂)
+rename ρ (μ trm) = μ (rename (ext ρ) trm)
 ```
 
 Here is an example of renaming a term with one free
@@ -227,7 +235,8 @@ exts : ∀ {Γ Δ}
   → (∀ {A} →       Γ ∋ A →     Δ ⊢ A)
     ---------------------------------
   → (∀ {A B} → Γ , B ∋ A → Δ , B ⊢ A)
-exts σ pos = {!!}
+exts σ Z = ` Z
+exts σ (S pos) = rename S_ (σ pos)
 ```
 
 This subst now looks like the old rename!
@@ -252,10 +261,11 @@ variables it is easy to define the special case of
 substitution for one free variable:
 ```agda
 _[_] : ∀ {Γ A B}  → Γ , B ⊢ A → Γ ⊢ B → Γ ⊢ A
-_[_] {Γ} {A} {B} N M =  {!!}
+_[_] {Γ} {A} {B} N M =  subst σ N
   where
   σ : ∀ {A} → Γ , B ∋ A → Γ ⊢ A
-  σ pos = {!!}
+  σ Z = M
+  σ (S pos) = ` pos
 ```
 
 ```agda
@@ -440,7 +450,11 @@ data Steps {A} : ∅ ⊢ A → Set where
   steps : {L N : ∅ ⊢ A} → L —↠ N → Finished N → Steps L
 
 eval : ∀ {A} → Gas → (L : ∅ ⊢ A) → Steps L
-eval gs tm = {!!}
+eval (gas zero) tm = steps (tm ∎) out-of-gas
+eval (gas (suc amount)) tm with progress tm
+... | done Vtm = steps (tm ∎) (done Vtm)
+... | step {N} st with eval (gas amount) N
+...     | steps sts fin = steps (step—→ tm sts st) fin
 ```
 
 ## Examples
@@ -469,25 +483,25 @@ _ = refl
 ```
 
 The Church numeral two applied to successor and zero:
-```agda
+
 _ : eval (gas 100) (twoᶜ · sucᶜ · `zero) ≡
-  {!!}
+  {!eval (gas 100) (twoᶜ · sucᶜ · `zero)!}
 _ = {!!}
-```
+
 
 Two plus two is four:
-```agda
+
 _ : eval (gas 100) (plus · two · two) ≡
-     {!!}
+     {!eval (gas 100) (plus · two · two)!}
 _ = {!!}
-```
+
 
 And the corresponding term for Church numerals:
-```agda
+
 _ : eval (gas 100) (plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero) ≡
     {!!}
 _ = {!!}
-```
+
 
 We omit the proof that reduction is deterministic, since it is
 tedious and almost identical to the previous proof.
