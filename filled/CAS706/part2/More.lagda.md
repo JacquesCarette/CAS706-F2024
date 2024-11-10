@@ -958,7 +958,9 @@ V¬—→ : ∀ {Γ A} {M N : Γ ⊢ A}
   → Value M
     ----------
   → ¬ (M —→ N)
-V¬—→ isV red = {!!}
+V¬—→ (V-suc isV) (ξ-suc red) = V¬—→ isV red
+V¬—→ V-⟨ isV , isV₁ ⟩ (ξ-⟨,⟩₁ red) = V¬—→ isV red
+V¬—→ V-⟨ isV , isV₁ ⟩ (ξ-⟨,⟩₂ x red) = V¬—→ isV₁ red
 ```
 
 
