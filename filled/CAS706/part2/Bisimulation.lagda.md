@@ -119,7 +119,7 @@ but only bother to include in the simulation the terms of interest.
 
 ```agda
 ~val : ∀ {Γ A} {M M† : Γ ⊢ A} → M ~ M† → Value M → Value M†
-~val rel v = {!!}
+~val (~ƛ rel) V-ƛ = V-ƛ
 ```
 
 ## Simulation commutes with renaming
@@ -152,7 +152,8 @@ then for any `x` in `Γ , B ∋ A` we have `exts σ x ~ exts σ† x`:
   → (∀ {A} → (x : Γ ∋ A) → σ x ~ σ† x)
     --------------------------------------------------
   → (∀ {A B} → (x : Γ , B ∋ A) → exts σ x ~ exts σ† x)
-~exts ~σ loc = {!!}
+~exts ~σ Z = ~`
+~exts ~σ (S loc) = ~rename S_ (~σ loc)
 ```
 
 ```agda
@@ -162,7 +163,10 @@ then for any `x` in `Γ , B ∋ A` we have `exts σ x ~ exts σ† x`:
   → (∀ {A} → (x : Γ ∋ A) → σ x ~ σ† x)
     ---------------------------------------------------------
   → (∀ {A} {M M† : Γ ⊢ A} → M ~ M† → subst σ M ~ subst σ† M†)
-~subst ~σ rel = {!!}
+~subst ~σ ~`              = ~σ _
+~subst ~σ (~ƛ rel)        = ~ƛ ~subst (~exts ~σ) rel
+~subst ~σ (rel ~· rel₁)   = ~subst ~σ rel ~· ~subst ~σ rel₁
+~subst ~σ (~let rel rel₁) = ~let (~subst ~σ rel) (~subst (~exts ~σ) rel₁)
 
 ~sub : ∀ {Γ A B} {N N† : Γ , B ⊢ A} {M M† : Γ ⊢ B}
   → N ~ N†
@@ -209,7 +213,15 @@ sim : ∀ {Γ A} {M M† N : Γ ⊢ A}
   → M —→ N
     ---------
   → Leg  M† N
-sim sim stp = {!!}
+sim (~`) () -- added by hand to show that you can
+sim (sim₁ ~· sim₂) (ξ-·₁ stp) with
+  leg x y ← sim sim₁ stp = leg (x ~· sim₂) (ξ-·₁ y)
+sim (sim₁ ~· sim₂) (ξ-·₂ x stp) with
+  leg sim₃ stp₃ ← sim sim₂ stp = leg (sim₁ ~· sim₃) (ξ-·₂ (~val sim₁ x) stp₃)
+sim ((~ƛ sim₁) ~· sim₂) (β-ƛ x) = leg (~sub sim₁ sim₂) (β-ƛ (~val sim₂ x))
+sim (~let sim₁ sim₂) (ξ-let stp) with
+  leg sim₃ stp₃ ← sim sim₁ stp = leg (~let sim₃ sim₂) (ξ-·₂ V-ƛ stp₃)
+sim (~let sim₁ sim₂) (β-let x) = leg (~sub sim₂ sim₁) (β-ƛ (~val sim₁ x))
 ```
 ## Unicode
 
