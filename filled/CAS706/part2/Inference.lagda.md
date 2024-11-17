@@ -125,7 +125,7 @@ open import Relation.Binary.PropositionalEquality
 open import Data.Empty using (⊥)
 open import Data.Nat.Base using (ℕ; zero; suc; _+_; _*_)
 open import Data.String using (String; _≟_)
-open import Data.Product.Base using (_×_; ∃; ∃-syntax) renaming (_,_ to ⟨_,_⟩)
+open import Data.Product.Base using (_×_; ∃; ∃-syntax; Σ; proj₂) renaming (_,_ to ⟨_,_⟩)
 open import Relation.Nullary.Negation using (¬_; contradiction)
 open import Relation.Nullary.Decidable using ( Dec; yes; no; False; toWitnessFalse)
 
@@ -289,16 +289,22 @@ The rule for `M ↑` requires the ability to decide whether two types
 are equal.
 ```agda
 _≟Tp_ : (A B : Type) → Dec (A ≡ B)
-t ≟Tp s = {!!}
+`ℕ ≟Tp `ℕ = yes refl
+`ℕ ≟Tp (s ⇒ t) = no λ ()
+(s ⇒ t) ≟Tp `ℕ = no λ ()
+(s ⇒ t) ≟Tp (x ⇒ y) with s ≟Tp x | t ≟Tp y
+... | no ¬s≡x | _ = no λ { refl → contradiction refl ¬s≡x }
+... | yes s≡x | no ¬t≡y = no λ { refl → contradiction refl ¬t≡y }
+... | yes s≡x | yes t≡y = yes (cong₂ _⇒_ s≡x t≡y)
 
 dom≡ : ∀ {A A′ B B′} → A ⇒ B ≡ A′ ⇒ B′ → A ≡ A′
-dom≡ eq = {!!}
+dom≡ refl = refl
 
 rng≡ : ∀ {A A′ B B′} → A ⇒ B ≡ A′ ⇒ B′ → B ≡ B′
-rng≡ eq = {!!}
+rng≡ refl = refl
 
 ℕ≢⇒ : ∀ {A B} → `ℕ ≢ A ⇒ B
-ℕ≢⇒ eq = {!!}
+ℕ≢⇒ ()
 ```
 
 
@@ -314,7 +320,9 @@ uniq-∋ (S _ ∋x) (S _ ∋x′)  =  uniq-∋ ∋x ∋x′
 
 ```agda
 uniq-↑ : ∀ {Γ M A B} → Γ ⊢ M ↑ A → Γ ⊢ M ↑ B → A ≡ B
-uniq-↑ lft rgt = {!!}
+uniq-↑ (⊢` x) (⊢` y) = uniq-∋ x y
+uniq-↑ (lft · x) (rgt · y) = rng≡ (uniq-↑ lft rgt)
+uniq-↑ (⊢↓ x) (⊢↓ y) = refl
 ```
 
 ## Lookup type of a variable in the context
@@ -323,10 +331,16 @@ lemma lets us 'extend' failure all the way.
 ```agda
 ext∋ : ∀ {Γ B x y}  → x ≢ y → ¬ (∃[ A ] Γ ∋ x ⦂ A)
   → ¬ (∃[ A ] Γ , y ⦂ B ∋ x ⦂ A)
-ext∋ x≢y witness  ⟨ A , pos ⟩ = {!!}
+ext∋ x≢y witness ⟨ A , Z ⟩ = contradiction refl x≢y
+ext∋ x≢y witness ⟨ A , S x pos ⟩ = contradiction ⟨ A , pos ⟩ witness
 
 lookup : ∀ (Γ : Context) (x : Id) → Dec (∃[ A ] Γ ∋ x ⦂ A)
-lookup ctx x = {!!}
+lookup ∅ x = no λ ()
+lookup (ctx , y ⦂ A) x with x ≟ y
+... | yes refl = yes ⟨ A , Z ⟩
+... | no ¬x≡y  with lookup ctx x
+...    | yes ⟨ B , pos ⟩  = yes ⟨ B , S ¬x≡y pos ⟩
+...    | no  nowhere = no (ext∋ ¬x≡y nowhere)
 ```
 
 ## Promoting negations
@@ -339,11 +353,11 @@ tricky).
 ```agda
 ¬arg : ∀ {Γ A B L M} → Γ ⊢ L ↑ A ⇒ B → ¬ Γ ⊢ M ↓ A
   → ¬ (∃[ B′ ] Γ ⊢ L · M ↑ B′)
-¬arg ⊢L ¬M↓ ⟨ B′ , ⊢L′ · ⊢M′ ⟩ = {!!}
+¬arg ⊢L ¬M↓ ⟨ B′ , ⊢L′ · ⊢M′ ⟩ rewrite dom≡ (uniq-↑ ⊢L ⊢L′) = ¬M↓ ⊢M′ 
 
 ¬switch : ∀ {Γ M A B} → Γ ⊢ M ↑ A → A ≢ B
   → ¬ Γ ⊢ (M ↑) ↓ B
-¬switch ⊢M A≢B (⊢↑ ⊢M′ A′≡B) = {!!}
+¬switch ⊢M A≢B (⊢↑ ⊢M′ A′≡B) rewrite uniq-↑ ⊢M ⊢M′ = contradiction A′≡B A≢B
 ```
 
 ## Synthesize and inherit types
