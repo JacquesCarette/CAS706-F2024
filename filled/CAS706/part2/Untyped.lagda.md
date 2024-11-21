@@ -180,7 +180,7 @@ For example, here is the evidence that the Church numeral two is in
 normal form:
 ```agda
 _ : Normal (twoᶜ {∅})
-_ = {!!}
+_ = ƛ ƛ (′ (#′ 1) · (′ ((#′ 1) · (′ (#′ 0)))))
 ```
 
 
@@ -224,17 +224,17 @@ _ : 2+2ᶜ —↠ fourᶜ
 _ =
   begin
     plusᶜ · twoᶜ · twoᶜ
-  —→⟨ {!!} ⟩
+  —→⟨ ξ₁ β ⟩
     (ƛ ƛ ƛ twoᶜ · # 1 · (# 2 · # 1 · # 0)) · twoᶜ
-  —→⟨ {!!} ⟩
+  —→⟨ β ⟩
     ƛ ƛ twoᶜ · # 1 · (twoᶜ · # 1 · # 0)
-  —→⟨ {!!} ⟩
+  —→⟨ ζ (ζ (ξ₁ β)) ⟩
     ƛ ƛ ((ƛ # 2 · (# 2 · # 0)) · (twoᶜ · # 1 · # 0))
-  —→⟨ {!!} ⟩
+  —→⟨ ζ (ζ β) ⟩
     ƛ ƛ # 1 · (# 1 · (twoᶜ · # 1 · # 0))
-  —→⟨ {!!} ⟩
+  —→⟨ ζ (ζ (ξ₂ (ξ₂ (ξ₁ β)))) ⟩
     ƛ ƛ # 1 · (# 1 · ((ƛ # 2 · (# 2 · # 0)) · # 0))
-  —→⟨ {!!} ⟩
+  —→⟨ ζ (ζ (ξ₂ (ξ₂ β))) ⟩
    ƛ (ƛ # 1 · (# 1 · (# 1 · (# 1 · # 0))))
   ∎
 ```
@@ -257,7 +257,16 @@ data Progress {Γ A} (M : Γ ⊢ A) : Set where
 If a term is well scoped then it satisfies progress:
 ```agda
 progress : ∀ {Γ A} → (M : Γ ⊢ A) → Progress M
-progress trm = {!!}
+progress (` x) = done (′ (` x))
+progress (ƛ trm) with progress trm
+... | step x = step (ζ x)
+... | done x = done (ƛ x)
+progress (s · t) with progress s
+... | step x = step (ξ₁ x)
+... | done (ƛ x) = step β
+... | done (′ x) with progress t
+...    | step y = step (ξ₂ y)
+...    | done y = done (′ x · y)
 ```
 
 ## Evaluation
@@ -289,8 +298,8 @@ generalises to an arbitrary context `Γ`.
 
 We reiterate our previous example. Two plus two is four, with Church numerals:
 ```agda
-_ : eval (gas 100) 2+2ᶜ ≡ {!!}
-_ = refl
+-- _ : eval (gas 100) 2+2ᶜ ≡ {!eval (gas 100) 2+2ᶜ!}
+-- _ = refl
 ```
 
 ## Naturals and fixpoint
