@@ -119,7 +119,7 @@ negative proof ~ semantically verified error message (but not so readable...)
 
 ## Imports
 
-```agda
+f```agda
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; sym; trans; cong; cong₂; _≢_)
 open import Data.Empty using (⊥)
@@ -370,9 +370,45 @@ inherit : ∀ (Γ : Context) (M : Term⁻) (A : Type) → Dec (Γ ⊢ M ↓ A)
 Here we need to carefully synthesize or inherit the pieces, according to
 their 'variance':
 ```agda
-synthesize Γ trm = {!!}
+synthesize Γ (` x) with lookup Γ x
+... | yes ⟨ A , x⦂A ⟩ = yes ⟨ A , ⊢` x⦂A ⟩
+... | no  x∉Γ = no \ { ⟨ A , ⊢` x⦂A ⟩ → contradiction ⟨ A , x⦂A ⟩ x∉Γ }
+synthesize Γ (t · s) with synthesize Γ t
+... | no ¬t↑A        = no λ { ⟨ B , t↑C · _ ⟩ → ¬t↑A ⟨ _ , t↑C ⟩ }
+... | yes ⟨ `ℕ , t↑ℕ ⟩      = no λ { ⟨ A , t↑A⇒B · s↓ ⟩ → ℕ≢⇒ (uniq-↑ t↑ℕ t↑A⇒B) }
+... | yes ⟨ A ⇒ B , t↑A⇒B ⟩ with inherit Γ s A
+...     | yes s↓A = yes ⟨ B , t↑A⇒B · s↓A ⟩
+...     | no ¬s↓A = no (¬arg t↑A⇒B ¬s↓A)
+synthesize Γ (t ↓ A) with inherit Γ t A
+... | yes t⦂A = yes ⟨ A , ⊢↓ t⦂A ⟩
+... | no  ¬t⦂A = no λ { ⟨ B , ⊢↓ x ⟩ → contradiction x ¬t⦂A }
 
-inherit Γ trm typ = {!!}
+inherit Γ (ƛ x ⇒ trm) `ℕ = no λ ()
+inherit Γ (ƛ x ⇒ trm) (A ⇒ B) with inherit (Γ , x ⦂ A) trm B
+... | yes pf = yes (⊢ƛ pf)
+... | no  ¬chk = no λ { (⊢ƛ chk) → contradiction chk ¬chk }
+inherit Γ `zero `ℕ = yes ⊢zero
+inherit Γ `zero (typ ⇒ typ₁) = no λ ()
+inherit Γ (`suc trm) `ℕ with inherit Γ trm `ℕ
+... | yes trm⦂ℕ = yes (⊢suc trm⦂ℕ)
+... | no ¬trm⦂ℕ = no λ { (⊢suc x) → ¬trm⦂ℕ x}
+inherit Γ (`suc trm) (typ ⇒ typ₁) = no λ ()
+inherit Γ `case x [zero⇒ zer |suc y ⇒ sc ] typ with synthesize Γ x
+... | no ¬x⊢A = no λ { (⊢case ⊢z⦂A _ _) → ¬x⊢A ⟨ `ℕ , ⊢z⦂A ⟩}
+... | yes ⟨ _ ⇒ _ , ⊢L ⟩ = no λ { (⊢case ⊢L′ _ _) → ℕ≢⇒ (uniq-↑ ⊢L′ ⊢L)} 
+... | yes ⟨ `ℕ , x⦂ℕ ⟩ with inherit Γ zer typ
+...    | no ¬zer⊢A = no λ { (⊢case _ zer⦂A _) → contradiction zer⦂A ¬zer⊢A}
+...    | yes zer⦂A with inherit (Γ , y ⦂ `ℕ) sc typ
+...        | no ¬sc⊢A = no λ { (⊢case _ _ sc⊢A) → contradiction sc⊢A ¬sc⊢A}
+...        | yes sc⦂A = yes (⊢case x⦂ℕ zer⦂A sc⦂A)
+inherit Γ (μ x ⇒ trm) typ with inherit (Γ , x ⦂ typ) trm typ
+... | no ¬trm⦂typ = no λ { (⊢μ xx) → contradiction xx ¬trm⦂typ}
+... | yes xx = yes (⊢μ xx)
+inherit Γ (x ↑) typ with synthesize Γ x
+... | no ¬x⦂A        = no λ { (⊢↑ x↑A refl) → ¬x⦂A ⟨ typ , x↑A ⟩}
+... | yes ⟨ A , x⦂A ⟩ with A ≟Tp typ
+...     | yes refl = yes (⊢↑ x⦂A refl)
+...     | no A≢typ = no (¬switch x⦂A A≢typ)
 ```
 
 ## Testing the example terms
@@ -381,13 +417,6 @@ inherit Γ trm typ = {!!}
 S′ : ∀ {Γ x y A B} → {x≢y : False (x ≟ y)} → Γ ∋ x ⦂ A
    → Γ , y ⦂ B ∋ x ⦂ A
 S′ {x≢y = x≢y} x = S (toWitnessFalse x≢y) x
-```
-
-We confirm that synthesis on the relevant term returns
-natural as the type and the above derivation:
-```agda
-_ : synthesize ∅ 2+2 ≡ yes ⟨ `ℕ , {!!} ⟩
-_ = refl
 ```
 
 ## Testing the error cases
