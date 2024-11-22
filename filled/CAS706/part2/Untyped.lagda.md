@@ -1,4 +1,5 @@
 ```agda
+{-# OPTIONS --allow-unsolved-metas #-}
 module CAS706.part2.Untyped where
 ```
 
