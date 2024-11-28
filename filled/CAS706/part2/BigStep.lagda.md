@@ -103,7 +103,9 @@ data _⊢_⇓_ : ∀{Γ} → ClosEnv Γ → (Γ ⊢ ★) → Clos → Set where
 ⇓-determ : ∀{Γ}{γ : ClosEnv Γ}{M : Γ ⊢ ★}{V V' : Clos}
   → γ ⊢ M ⇓ V → γ ⊢ M ⇓ V'
   → V ≡ V'
-⇓-determ v v' = {!!}
+⇓-determ (⇓-var x v) (⇓-var x₁ v') with refl ← trans (sym x) x₁ = ⇓-determ v v'
+⇓-determ ⇓-lam ⇓-lam = refl
+⇓-determ (⇓-app v₀ v₁) (⇓-app v₂ v₃) with refl ← ⇓-determ v₀ v₂ = ⇓-determ v₁ v₃
 ```
 
 
@@ -125,7 +127,7 @@ following two mutually-recursive predicates `V ≈ M` and `γ ≈ₑ σ`.
 _≈_ : Clos → (∅ ⊢ ★) → Set
 _≈ₑ_ : ∀{Γ} → ClosEnv Γ → Subst Γ ∅ → Set
 
-(clos {Γ} M γ) ≈ N = Σ[ σ ∈ Subst Γ ∅ ] γ ≈ₑ σ × (N ≡ subst σ M)
+(clos {Γ} M γ) ≈ N = Σ[ σ ∈ Subst Γ ∅ ] (γ ≈ₑ σ) × (N ≡ subst σ M)
 
 γ ≈ₑ σ = ∀ x → (γ x) ≈ (σ x)
 ```

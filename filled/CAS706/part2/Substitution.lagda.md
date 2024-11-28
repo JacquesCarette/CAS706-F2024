@@ -65,7 +65,7 @@ Subst : Context → Context → Set
 Subst Γ Δ = ∀{A} → Γ ∋ A → Δ ⊢ A
 
 ⟪_⟫ : ∀{Γ Δ A} → Subst Γ Δ → Γ ⊢ A → Δ ⊢ A
-⟪ σ ⟫ = λ M → subst σ M
+⟪ σ ⟫ = subst σ
 ```
 
 ## The σ algebra of substitution
@@ -212,40 +212,40 @@ cons'ing `M` onto `σ`.
 ```agda
 sub-head : ∀ {Γ Δ} {A} {M : Δ ⊢ A}{σ : Subst Γ Δ}
          → ⟪ M • σ ⟫ (` Z) ≡ M
-sub-head = {!!}
+sub-head = refl
 
 sub-tail : ∀{Γ Δ} {A B} {M : Δ ⊢ A} {σ : Subst Γ Δ}
          → (↑ ⨟ M • σ) {A = B} ≡ σ
-sub-tail = {!!}
+sub-tail = refl
 
 sub-η : ∀{Γ Δ} {A B} {σ : Subst (Γ , A) Δ}
       → (⟪ σ ⟫ (` Z) • (↑ ⨟ σ)) {A = B} ≡ σ
-sub-η {Γ}{Δ}{A}{B}{σ} = {!!}
+sub-η {Γ}{Δ}{A}{B}{σ} = extensionality λ { Z → refl ; (S x) → refl}
 ```
 
 ```agda
 Z-shift : ∀{Γ}{A B}
         → ((` Z) • ↑) ≡ ids {Γ , A} {B}
-Z-shift {Γ}{A}{B} = {!!}
+Z-shift {Γ}{A}{B} = extensionality λ { Z → refl ; (S x) → refl}
 ```
 
 ```agda
 sub-idL : ∀{Γ Δ} {σ : Subst Γ Δ} {A}
        → ids ⨟ σ ≡ σ {A}
-sub-idL = {!!}
+sub-idL = refl
 ```
 
 ```agda
 sub-dist :  ∀{Γ Δ Σ : Context} {A B} {σ : Subst Γ Δ} {τ : Subst Δ Σ}
               {M : Δ ⊢ A}
          → ((M • σ) ⨟ τ) ≡ ((subst τ M) • (σ ⨟ τ)) {B}
-sub-dist {Γ}{Δ}{Σ}{A}{B}{σ}{τ}{M} = {!!}
+sub-dist {Γ}{Δ}{Σ}{A}{B}{σ}{τ}{M} = extensionality λ { Z → refl ; (S x) → refl}
 ```
 
 ```agda
 sub-app : ∀{Γ Δ} {σ : Subst Γ Δ} {L : Γ ⊢ ★}{M : Γ ⊢ ★}
         → ⟪ σ ⟫ (L · M)  ≡ (⟪ σ ⟫ L) · (⟪ σ ⟫ M)
-sub-app = {!!}
+sub-app = refl
 ```
 
 
@@ -261,7 +261,7 @@ cong-ext : ∀{Γ Δ}{ρ ρ′ : Rename Γ Δ}{B}
    → (∀{A} → ρ ≡ ρ′ {A})
      ---------------------------------
    → ∀{A} → ext ρ {B = B} ≡ ext ρ′ {A}
-cong-ext{Γ}{Δ}{ρ}{ρ′}{B} rr {A} = {!!}
+cong-ext{Γ}{Δ}{ρ}{ρ′}{B} rr {A} = extensionality λ { Z → refl ; (S x) → cong (λ z → S z x) rr}
 
 -- since renaming depends on term
 cong-rename : ∀{Γ Δ}{ρ ρ′ : Rename Γ Δ}{B}{M : Γ ⊢ B}

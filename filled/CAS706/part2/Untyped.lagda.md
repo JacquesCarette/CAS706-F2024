@@ -332,6 +332,14 @@ Here is the Scott representation of naturals encoded with de Bruijn indexes:
 
 case : ∀ {Γ} → (Γ ⊢ ★) → (Γ ⊢ ★) → (Γ , ★ ⊢ ★)  → (Γ ⊢ ★)
 case L M N = L · (ƛ N) · M
+
+-- let's see what one looks like
+`one : ∀ {Γ} → (Γ ⊢ ★)
+`one = ƛ ƛ (# 1) · `zero
+
+-- let's see in Agda
+`oneA : {A B B′ C : Set} → ((A → B → B) → C) → B′ → C
+`oneA a b = a (λ a b → b)
 ```
 Here we have been careful to retain the exact form of our previous
 definitions.  The successor branch expects an additional variable to
@@ -409,8 +417,8 @@ L —↠⟨ L—↠M ⟩ M—↠N = —↠-trans L—↠M M—↠N
 
 ```agda
 appL-cong : ∀ {Γ} {L L' M : Γ ⊢ ★} → L —↠ L' → L · M —↠ L' · M
-appL-cong stps = {!!}
-
+appL-cong (_ ∎) = _ ∎
+appL-cong (_ —→⟨ x ⟩ stps) = _ —→⟨ ξ₁ x ⟩ appL-cong stps
 
 
 
