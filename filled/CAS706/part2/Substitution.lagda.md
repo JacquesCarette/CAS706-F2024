@@ -261,30 +261,34 @@ cong-ext : ∀{Γ Δ}{ρ ρ′ : Rename Γ Δ}{B}
    → (∀{A} → ρ ≡ ρ′ {A})
      ---------------------------------
    → ∀{A} → ext ρ {B = B} ≡ ext ρ′ {A}
-cong-ext{Γ}{Δ}{ρ}{ρ′}{B} rr {A} = extensionality λ { Z → refl ; (S x) → cong (λ z → S z x) rr}
+cong-ext rr = extensionality λ { Z → refl ; (S x) → cong (λ z → S z x) rr}
 
 -- since renaming depends on term
 cong-rename : ∀{Γ Δ}{ρ ρ′ : Rename Γ Δ}{B}{M : Γ ⊢ B}
         → (∀{A} → ρ ≡ ρ′ {A})
           ------------------------
         → rename ρ M ≡ rename ρ′ M
-cong-rename {M = M} ss = {!!}
+cong-rename {M = ` x} ss = cong (λ z → ` z x) ss
+cong-rename {M = ƛ M} ss = cong ƛ_ (cong-rename {M = M} (cong-ext ss))
+cong-rename {M = L · M} ss = cong₂ _·_ (cong-rename ss) (cong-rename ss)
 
 cong-exts : ∀{Γ Δ}{σ σ′ : Subst Γ Δ}{B}
    → (∀{A} → σ ≡ σ′ {A})
      -----------------------------------
    → ∀{A} → exts σ {B = B} ≡ exts σ′ {A}
-cong-exts{Γ}{Δ}{σ}{σ′}{B} ss {A} = extensionality λ x → lemma {x}
+cong-exts {σ = σ}{σ′} ss = extensionality lemma
    where
-   lemma : ∀{x} → exts σ x ≡ exts σ′ x
-   lemma {Z} = refl
-   lemma {S x} = cong (rename S_) (cong-app (ss {A}) x)
+   lemma : ∀ x → exts σ x ≡ exts σ′ x
+   lemma Z = refl
+   lemma (S x) = cong (rename S_) (cong-app ss x)
 
 cong-sub : ∀{Γ Δ}{σ σ′ : Subst Γ Δ}{A}{M M′ : Γ ⊢ A}
             → (∀{A} → σ ≡ σ′ {A})  →  M ≡ M′
               ------------------------------
             → subst σ M ≡ subst σ′ M′
-cong-sub {M = M} ss eq = {!!}
+cong-sub {M = ` x} ss refl = cong (λ z → z x) ss
+cong-sub {M = ƛ M} ss refl = cong ƛ_ (cong-sub {M = M} (cong-exts ss) refl)
+cong-sub {M = L · M} ss refl = cong₂ _·_ (cong-sub {M = L} ss refl) (cong-sub {M = M} ss refl)
 
 cong-sub-zero : ∀{Γ}{B : Type}{M M′ : Γ ⊢ B}
   → M ≡ M′

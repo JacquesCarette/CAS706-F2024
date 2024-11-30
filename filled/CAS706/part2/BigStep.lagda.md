@@ -175,7 +175,8 @@ subst-zero-exts {Γ}{Δ}{σ}{B}{M}{x} =
   → γ ≈ₑ σ  →  V ≈ N
     --------------------------
   → (γ ,' V) ≈ₑ (ext-subst σ N)
-≈ₑ-ext γ≈ₑσ V≈N loc = {!!}
+≈ₑ-ext γ≈ₑσ V≈N Z = V≈N
+≈ₑ-ext {Γ}{γ}{σ}{V}{N} γ≈ₑσ V≈N (S loc) rewrite (subst-zero-exts{σ = σ}{M = N}{loc}) = γ≈ₑσ loc
 ```
 
 To prove the main lemma, we need another technical lemma about
@@ -231,7 +232,8 @@ cbn→reduce :  ∀{M : ∅ ⊢ ★}{Δ}{δ : ClosEnv Δ}{N′ : Δ , ★ ⊢ �
   → Σ[ N ∈ ∅ , ★ ⊢ ★ ] (M —↠ ƛ N)
 cbn→reduce {M}{Δ}{δ}{N′} M⇓c
     with ⇓→—↠×≈{σ = ids} M⇓c ≈ₑ-id
-... | xx = {!!}
+... | ⟨ L , ⟨ M⟶L , ⟨ σ′ , ⟨ δ≈ₑσ′ , refl ⟩ ⟩ ⟩ ⟩ rewrite sub-id {M = M} =
+          ⟨ subst (exts σ′) N′ , M⟶L ⟩
 
 
 
